@@ -46,7 +46,7 @@ API主要使用：
 
 ```
 [root@linux-node1 ~]# yum install https://mirrors.aliyun.com/epel/epel-release-latest-7.noarch.rpm
-[root@linux-node1 src]# yum install -y gcc glibc make zlib-devel openssl-devel curl-devel
+[root@linux-node1 ~]# yum install -y gcc glibc make zlib-devel openssl-devel curl-devel
 [root@linux-node1 ~]# cd /usr/local/src
 [root@linux-node1 src]# wget https://www.python.org/ftp/python/3.6.6/Python-3.6.6.tgz
 [root@linux-node1 src]# tar zxf Python-3.6.6.tgz
@@ -58,11 +58,11 @@ API主要使用：
 2.创建Python虚拟环境,并安装依赖
 
 ```
-[root@linux-node1 opt]# /usr/local/Python-3.6.6/bin/pyvenv-3.6 opencmdbENV
 [root@linux-node1 ~]# cd /opt/
-[root@linux-node1 opt]# git clone http://gitlab.devopsedu.com/opencmdb/opencmdb-backend.git
-[root@linux-node1 ~]# source /opt/opencmdbENV/bin/activate
-(opencmdbENV) [root@linux-node1 ~]# pip install -r /opt/opencmdb-backend/requirements.txt 
+[root@linux-node1 opt]# /usr/local/Python-3.6.6/bin/pyvenv-3.6 opencmdb-backend-runtime
+[root@linux-node1 opt]# git clone https://github.com/unixhot/opencmdb-backend.git
+[root@linux-node1 opt]# source /opt/opencmdb-backend-runtime/bin/activate
+(opencmdb-backend-runtime) [root@devopsedu opt]# pip install -r /opt/opencmdb-backend/requirements.txt 
 
 ```
 
@@ -71,6 +71,7 @@ API主要使用：
 ```
 [root@linux-node1 ~]# yum install -y mongodb mongodb-server
 [root@linux-node1 ~]# systemctl start mongod
+[root@linux-node1 ~]# systemctl enable mongod
 [root@linux-node1 ~]# netstat -ntlp | grep 27017
 tcp        0      0 127.0.0.1:27017         0.0.0.0:*               LISTEN      28513/mongod
 [root@linux-node1 ~]# mongo
@@ -86,6 +87,8 @@ Successfully added user: {
 		}
 	]
 }
+> exit
+bye
 
 ```
 
@@ -93,19 +96,27 @@ Successfully added user: {
 
 
 ```
+#开启一个screen，把OpenCMDB后端服务运行在screen中。
+[root@linux-node1 ~]# screen
 [root@linux-node1 ~]# cd /opt/opencmdb-backend/
-[root@linux-node1 ~]# source /opt/opencmdbENV/bin/activate
+[root@linux-node1 ~]# source /opt/opencmdb-backend-runtime/bin/activate
 #指定使用development的配置
-export FLASK_ENV=DEVELOPMENT
+[root@linux-node1 ~]# export FLASK_ENV=DEVELOPMENT
 
 #设置配置文件
  (opencmdbENV) [root@linux-node1 opencmdb-backend]# cp api/config/development.py_sample api/config/development.py
  (opencmdbENV) [root@linux-node1 opencmdb-backend]# vim api/config/development.py
  #(编辑api/config/development.py 更改mongo的配置, 任意配置SECRET_KEY和SECURITY_PASSWORD_SALT)
 
- #执行 python manager.py init_user_info 初始化用户信息
+ #执行 python manager.py init_user_info 初始化用户信息，可以自行修改初始化密码。
+(opencmdbENV) [root@linux-node1 opencmdb-backend]# vim scripts/init_user_info.py 
+def init_user_info():
+    user = create_user('admin@opencmdb.cn', 'opencmdb')
+    role = create_role('admin', '管理员')
+    grant_role_to_user(user, role)
+
 (opencmdbENV) [root@linux-node1 opencmdb-backend]# python manager.py init_user_info
-(opencmdbENV) [root@linux-node1 opencmdb-backend]# python manager.py runserver -h 0.0.0.0 -p 6000
+(opencmdbENV) [root@linux-node1 opencmdb-backend]# python manager.py runserver -h 0.0.0.0 -p 5000
 
 ```
 
@@ -114,6 +125,9 @@ export FLASK_ENV=DEVELOPMENT
 - 修改 `./swagger/index.html` 44行 将地址配置为自己的服务地址
 - 修改 `./swagger/public/api.ymd` 12行 将地址配置为自己的服务地址
 
+6.访问OpenCMDB
+
+用户名：admin@opencmdb.cn  密码：opencmdb
 
 # DevOps Flow：该项目使用DevOps-X进行管理
 
