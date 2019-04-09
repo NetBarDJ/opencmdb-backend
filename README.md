@@ -94,36 +94,44 @@ bye
 
 4.修改配置文件并启动
 
-
+4.1 开启一个screen，把OpenCMDB后端服务运行在screen中。
 ```
-#开启一个screen，把OpenCMDB后端服务运行在screen中。
 [root@linux-node1 ~]# screen
 [root@linux-node1 ~]# cd /opt/opencmdb-backend/
 [root@linux-node1 ~]# source /opt/opencmdb-backend-runtime/bin/activate
-#指定使用development的配置
+```
+
+4.2 指定使用development的配置
+```
 [root@linux-node1 ~]# export FLASK_ENV=DEVELOPMENT
+```
 
-#设置配置文件
- (opencmdbENV) [root@linux-node1 opencmdb-backend]# cp api/config/development.py_sample api/config/development.py
- (opencmdbENV) [root@linux-node1 opencmdb-backend]# vim api/config/development.py
+4.3 设置配置文件
+```
+(opencmdbENV) [root@linux-node1 opencmdb-backend]# cp api/config/development.py_sample api/config/development.py
+(opencmdbENV) [root@linux-node1 opencmdb-backend]# vim api/config/development.py
  #(编辑api/config/development.py 更改mongo的配置, 任意配置SECRET_KEY和SECURITY_PASSWORD_SALT)
-
- #执行 python manager.py init_user_info 初始化用户信息，可以自行修改初始化密码。
+``` 
+4.4 执行 python manager.py init_user_info 初始化用户信息，可以自行修改初始化密码。
+```
 (opencmdbENV) [root@linux-node1 opencmdb-backend]# vim scripts/init_user_info.py 
 def init_user_info():
     user = create_user('admin@opencmdb.cn', 'opencmdb')
     role = create_role('admin', '管理员')
     grant_role_to_user(user, role)
+```
 
+4.5 初始化用户信息并启动
+
+```
 (opencmdbENV) [root@linux-node1 opencmdb-backend]# python manager.py init_user_info
 (opencmdbENV) [root@linux-node1 opencmdb-backend]# python manager.py runserver -h 0.0.0.0 -p 5000
-
 ```
 
 5.配置swagger
 
-- 修改 `./swagger/index.html` 44行 将地址配置为自己的服务地址
-- 修改 `./swagger/public/api.ymd` 12行 将地址配置为自己的服务地址
+- 修改 `vim api/docs/index.html` 43行左右 将地址配置为自己的服务地址
+- 修改 `vim api/docs/public/api.yml` 17左右行 将地址配置为自己的服务地址
 
 6.访问OpenCMDB
 
